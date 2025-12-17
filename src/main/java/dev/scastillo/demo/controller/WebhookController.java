@@ -8,6 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/webhooks")
@@ -45,12 +50,39 @@ public class WebhookController {
     }
 
     private boolean validateSignature(String signature, String payload) {
-        if (signature == null || signature.isEmpty() || !webhookSecret.equals(signature)) {
-            // If no signature provided but secret is configured, reject
+        if (signature == null || signature.isEmpty()) {
             return webhookSecret.isEmpty();
         }
 
+        if (webhookSecret.isEmpty()) {
+            return false;
+        }
 
-        return true;
+        try {
+            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(
+                    webhookSecret.getBytes(StandardCharsets.UTF_8),
+                    "HmacSHA256"
+            );
+            hmacSha256.init(secretKey);
+
+            byte[] hash = hmacSha256.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+            String expectedSignature = bytesToHex(hash);
+
+            return MessageDigest.isEqual(
+                    expectedSignature.getBytes(StandardCharsets.UTF_8),
+                    signature.getBytes(StandardCharsets.UTF_8)
+            );
+        } catch (Exception e) {
+            log.error("Error validating webhook signature: {}", e.getMessage());
+            return false;
+        }
+    }
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
     }
 }
