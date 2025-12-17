@@ -23,6 +23,8 @@ public class WebhookController {
             @RequestHeader(value = "X-GrowthBook-Signature", required = false) String signature,
             @RequestBody(required = false) String payload
     ) {
+        log.info("value signature: {}", signature);
+        log.info("payload: {}", payload);
         if (!webhookSecret.isEmpty() && !validateSignature(signature, payload)) {
             log.warn("Invalid webhook signature");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid signature");
