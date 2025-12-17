@@ -1,3 +1,10 @@
 spring:
   application:
     name: demo
+
+growthbook:
+  enabled: ${GROWTHBOOK_ENABLED:true}
+  api-host: ${GROWTHBOOK_API_HOST}
+  client-key: ${GROWTHBOOK_CLIENT_KEY}
+  webhook:
+    secret: ${GROWTHBOOK_WEBHOOK_SECRET}
