@@ -3,7 +3,7 @@ spring:
     name: demo
 
 growthbook:
-  enabled: ${GROWTHBOOK_ENABLED:true}
+  enabled: ${GROWTHBOOK_ENABLED:false}
   api-host: ${GROWTHBOOK_API_HOST}
   client-key: ${GROWTHBOOK_CLIENT_KEY}
   webhook:
